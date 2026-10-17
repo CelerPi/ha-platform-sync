@@ -257,8 +257,8 @@ async def async_find_apple_tv_entities(hass: HomeAssistant) -> frozenset[str]:
     device_registry = dr.async_get(hass)
     apple_device_ids = {
         device.id
-        for device in device_registry.devices.values()
-        if set(getattr(device, "config_entries", ())) & apple_entry_ids
+        for entry_id in apple_entry_ids
+        for device in dr.async_entries_for_config_entry(device_registry, entry_id)
     }
     registry = er.async_get(hass)
     return frozenset(

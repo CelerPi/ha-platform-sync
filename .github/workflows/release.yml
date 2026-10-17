@@ -9,7 +9,7 @@ on:
       tag:
         description: Release tag (must match the integration version)
         required: true
-        default: "v0.7.1"
+        default: "v0.7.2"
         type: string
 
 permissions:
@@ -52,6 +52,10 @@ jobs:
         run: python tests/simulate_config_flow_acceptance.py
       - name: Validate translations
         run: python tests/validate_translations.py
+      - name: Run pure model and source tests
+        run: |
+          python tests/test_models.py
+          python tests/test_sources.py
       - name: Compile Python sources
         run: python -m compileall custom_components/platform_sync tests
       - name: Create GitHub release

@@ -359,7 +359,7 @@ def main() -> None:
 
     manifest = load_json(COMPONENT / "manifest.json")
     assert manifest["name"] == "Cross-Platform Device Sync"
-    assert manifest["version"] == "0.7.1"
+    assert manifest["version"] == "0.7.2"
     assert "google_assistant" in manifest["after_dependencies"]
 
     config_source = (COMPONENT / "config_flow.py").read_text(encoding="utf-8")

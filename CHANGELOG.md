@@ -7,7 +7,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-10-17
+
 ### Fixed
+
+- Use Home Assistant's `async_entries_for_config_entry` device lookup when
+  identifying Apple TV entities. Avoid deprecated device-registry mapping
+  access and `DeviceEntry.config_entries`, preserving entity and device
+  provenance matching without the HA 2027.9/2027.10 removal warnings.
 
 - Route every user-visible Platform Sync runtime notice exclusively through
   Home Assistant's native persistent-notification component. No mobile notify

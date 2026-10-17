@@ -1,5 +1,14 @@
 # Cross-Platform Device Sync for Home Assistant
 
+> **CelerPi fork — v0.7.2:** fixes Apple TV discovery warnings from the
+> Home Assistant device registry API changes. Add `CelerPi/ha-platform-sync`
+> as a HACS custom repository (category: **Integration**), download v0.7.2,
+> and restart Home Assistant. If you already use the upstream repository,
+> replace that HACS repository registration with this fork before downloading.
+> Local regression simulations pass; this fork has not been live-validated
+> on a running Home Assistant instance. The upstream validation results below
+> describe the upstream release.
+
 [![GitHub release](https://img.shields.io/github/v/release/jameslu34/ha-platform-sync)](https://github.com/jameslu34/ha-platform-sync/releases)
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE)
 [![Home Assistant validation](https://github.com/jameslu34/ha-platform-sync/actions/workflows/validate.yml/badge.svg)](https://github.com/jameslu34/ha-platform-sync/actions/workflows/validate.yml)

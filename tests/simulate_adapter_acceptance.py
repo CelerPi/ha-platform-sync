@@ -116,6 +116,7 @@ def install_stubs() -> None:
     device_registry.EVENT_DEVICE_REGISTRY_UPDATED = "device_registry_updated"
     entity_registry.EVENT_ENTITY_REGISTRY_UPDATED = "entity_registry_updated"
     device_registry.async_get = lambda _hass: SimpleNamespace(devices={})
+    device_registry.async_entries_for_config_entry = lambda _registry, _entry_id: []
     entity_registry.async_get = lambda _hass: SimpleNamespace(entities={})
     helpers.device_registry = device_registry
     helpers.entity_registry = entity_registry
@@ -3896,9 +3897,9 @@ async def check_google_executor_mutation_cancellation() -> int:
 
 
 async def check_single_switch_runtime() -> int:
-    """Version 0.7.1 has one enable switch and no sensor/button platforms."""
+    """The current release has one enable switch and no sensor/button platforms."""
     manifest = json.loads((PACKAGE / "manifest.json").read_text(encoding="utf-8"))
-    check(manifest["version"] == "0.7.1", "Manifest version matches the 0.7.1 release")
+    check(manifest["version"] == "0.7.2", "Manifest version matches the 0.7.2 release")
     check(
         "google_assistant" in manifest["after_dependencies"],
         "Native Google imports are declared as an after-dependency",

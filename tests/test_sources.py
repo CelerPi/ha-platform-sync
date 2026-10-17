@@ -1,4 +1,4 @@
-"""Dependency-light tests for Lovelace source extraction."""
+"""Dependency-light tests for dashboard and Apple TV source extraction."""
 
 import asyncio
 from types import SimpleNamespace
@@ -198,6 +198,80 @@ def test_multiple_dashboard_views_empty_aggregate_fails_closed() -> None:
         raise AssertionError("empty multi-view source must fail closed")
 
 
+def test_apple_tv_provenance_uses_supported_device_lookup() -> None:
+    class Device:
+        def __init__(self, device_id: str, entry_id: str) -> None:
+            self.id = device_id
+            self.config_entry_id = entry_id
+
+        @property
+        def config_entries(self):
+            raise AssertionError("Deprecated device config_entries accessed")
+
+    class Registry:
+        @property
+        def devices(self):
+            raise AssertionError("Device registry mapping accessed")
+
+    device_registry = Registry()
+    devices = (
+        Device("apple-one", "entry-one"),
+        Device("apple-two", "entry-two"),
+        Device("unrelated", "other-entry"),
+    )
+    entities = {
+        entity_id: SimpleNamespace(
+            entity_id=entity_id, config_entry_id=entry_id, device_id=device_id
+        )
+        for entity_id, entry_id, device_id in (
+            ("media_player.direct", "entry-one", None),
+            ("remote.device_one", None, "apple-one"),
+            ("remote.device_two", "other-entry", "apple-two"),
+            ("media_player.unrelated", "other-entry", "unrelated"),
+            ("sensor.unassigned", None, None),
+            ("sensor.missing_device", None, "missing"),
+        )
+    }
+    original_get = sources_module.dr.async_get
+    original_lookup = sources_module.dr.async_entries_for_config_entry
+    original_entity_get = sources_module.er.async_get
+    lookups = []
+
+    def lookup(registry, entry_id):
+        assert registry is device_registry
+        lookups.append(entry_id)
+        return [device for device in devices if device.config_entry_id == entry_id]
+
+    try:
+        sources_module.dr.async_get = lambda _hass: device_registry
+        sources_module.dr.async_entries_for_config_entry = lookup
+        sources_module.er.async_get = lambda _hass: SimpleNamespace(entities=entities)
+        for entry_ids, expected in (
+            (("entry-one", "entry-two"), {
+                "media_player.direct", "remote.device_one", "remote.device_two"
+            }),
+            (("entry-one", "entry-without-devices"), {
+                "media_player.direct", "remote.device_one"
+            }),
+            ((), set()),
+        ):
+            lookups.clear()
+
+            def entries(domain):
+                assert domain == "apple_tv"
+                return [SimpleNamespace(entry_id=value) for value in entry_ids]
+
+            hass = SimpleNamespace(config_entries=SimpleNamespace(async_entries=entries))
+            result = asyncio.run(sources_module.async_find_apple_tv_entities(hass))
+            assert result == expected
+            assert set(lookups) == set(entry_ids)
+            assert len(lookups) == len(entry_ids)
+    finally:
+        sources_module.dr.async_get = original_get
+        sources_module.dr.async_entries_for_config_entry = original_lookup
+        sources_module.er.async_get = original_entity_get
+
+
 if __name__ == "__main__":
     tests = [
         value
@@ -206,4 +280,4 @@ if __name__ == "__main__":
     ]
     for test in tests:
         test()
-    print(f"PASS: {len(tests)} Lovelace source tests")
+    print(f"PASS: {len(tests)} source tests")
